@@ -322,6 +322,8 @@ def build_pipeline(ctx, width, height):
 
 
 def start_ffmpeg(width: int, height: int, fps: int, output: str):
+    ext = output.rsplit(".", 1)[-1].lower()
+
     cmd = [
         "ffmpeg", "-y",
         "-f", "rawvideo",
@@ -329,13 +331,17 @@ def start_ffmpeg(width: int, height: int, fps: int, output: str):
         "-s", f"{width}x{height}",
         "-r", str(fps),
         "-i", "pipe:0",
-        "-c:v", "libx264",
-        "-pix_fmt", "yuv420p",
-        "-crf", "18",
-        "-preset", "medium",
-        "-movflags", "+faststart",
-        output,
     ]
+
+    if ext == "webm":
+        cmd += ["-c:v", "libvpx-vp9", "-pix_fmt", "yuv420p",
+                "-crf", "30", "-b:v", "0", "-an"]
+    else:
+        cmd += ["-c:v", "libx264", "-pix_fmt", "yuv420p",
+                "-crf", "18", "-preset", "medium",
+                "-movflags", "+faststart"]
+
+    cmd.append(output)
     return subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
 
 

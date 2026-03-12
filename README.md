@@ -42,6 +42,9 @@ python generate.py --octaves 4 --blur 8
 
 # Different composition via seed
 python generate.py --seed 99
+
+# WebM output (VP9, much smaller files)
+python generate.py --output hero.webm
 ```
 
 ## Options
@@ -61,7 +64,7 @@ python generate.py --seed 99
 | `--grain` | `0.03` | Grain intensity (0-1) |
 | `--blur` | `20.0` | Gaussian blur sigma in px (0 = off) |
 | `--seed` | `42` | Deterministic seed |
-| `--output` | `output.mp4` | Output file path |
+| `--output` | `output.mp4` | Output file path (.mp4 or .webm) |
 
 ## How colors work
 
