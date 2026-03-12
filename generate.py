@@ -257,10 +257,15 @@ def lerp_color(a, b, t):
     return tuple(a[i] + (b[i] - a[i]) * t for i in range(3))
 
 
-def lerp_grain(a, b, t):
-    """Slow-cycle between two grain patterns using a smooth sine curve."""
-    blend = 0.5 + 0.5 * np.sin(t * 2 * np.pi)
-    return (a * (1.0 - blend) + b * blend).astype(np.int16)
+def cycle_grain(patterns, t, cycles_per_loop=3.0):
+    """Cycle through multiple grain patterns with smooth crossfades."""
+    n = len(patterns)
+    pos = (t * cycles_per_loop * n) % n
+    idx_a = int(pos) % n
+    idx_b = (idx_a + 1) % n
+    blend = pos - int(pos)
+    blend = blend * blend * (3.0 - 2.0 * blend)  # smoothstep
+    return (patterns[idx_a] * (1.0 - blend) + patterns[idx_b] * blend).astype(np.int16)
 
 
 def infer_palette(primary_hex: str, secondary_hex: str):
@@ -330,7 +335,7 @@ def start_ffmpeg(width: int, height: int, fps: int, output: str):
 
     if ext == "webm":
         cmd += ["-c:v", "libvpx-vp9", "-pix_fmt", "yuv420p",
-                "-crf", "34", "-b:v", "0", "-an"]
+                "-crf", "28", "-b:v", "0", "-an"]
     else:
         cmd += ["-c:v", "libx264", "-pix_fmt", "yuv420p",
                 "-crf", "18", "-preset", "medium",
@@ -370,16 +375,7 @@ def render_video(args):
     pixel_h = 1.0 / height
 
     # Pre-generate grain textures at half resolution for slow-cycling blend
-    grain_a, grain_b = None, None
-    if args.grain > 0:
-        gs = args.grain_size
-        small_h, small_w = height // gs, width // gs
-        rng_a = np.random.default_rng(seed=int(args.seed * 31))
-        rng_b = np.random.default_rng(seed=int(args.seed * 59))
-        grain_a_small = rng_a.normal(0, args.grain * 255, (small_h, small_w, 3)).astype(np.int16)
-        grain_b_small = rng_b.normal(0, args.grain * 255, (small_h, small_w, 3)).astype(np.int16)
-        grain_a = grain_a_small.repeat(gs, axis=0).repeat(gs, axis=1)[:height, :width]
-        grain_b = grain_b_small.repeat(gs, axis=0).repeat(gs, axis=1)[:height, :width]
+    grain_intensity = args.grain * 255
 
     ffmpeg = start_ffmpeg(width, height, args.fps, args.output)
 
@@ -415,8 +411,8 @@ def render_video(args):
         frame = np.flipud(frame)
 
         if args.grain > 0:
-            t_grain = i / total_frames
-            noise = lerp_grain(grain_a, grain_b, t_grain)
+            rng = np.random.default_rng(seed=int(i * 7919 + args.seed))
+            noise = rng.normal(0, grain_intensity, frame.shape).astype(np.int16)
             frame = np.clip(frame.astype(np.int16) + noise, 0, 255).astype(np.uint8)
 
         ffmpeg.stdin.write(frame.tobytes())
@@ -456,10 +452,10 @@ def main():
                     help="fBM octaves; fewer = smoother (default: 2)")
     ap.add_argument("--warp", type=float, default=1.5,
                     help="Domain warp strength (default: 1.5)")
-    ap.add_argument("--grain", type=float, default=0.035,
-                    help="Grain intensity 0-1 (default: 0.035)")
-    ap.add_argument("--grain-size", type=int, default=2,
-                    help="Grain particle size in px; 1=per-pixel, 2=2x2, 4=4x4 (default: 2)")
+    ap.add_argument("--grain", type=float, default=0.02,
+                    help="Grain intensity 0-1 (default: 0.02)")
+    ap.add_argument("--grain-size", type=int, default=1,
+                    help="Grain particle size in px; 1=per-pixel, 2=2x2, 4=4x4 (default: 1)")
     ap.add_argument("--blur", type=float, default=20.0,
                     help="Gaussian blur sigma in px; 0 = off (default: 20.0)")
     ap.add_argument("--seed", type=float, default=42)
