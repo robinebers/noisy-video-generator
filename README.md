@@ -28,11 +28,11 @@ pip install -r requirements.txt
 ## Usage
 
 ```bash
-# Default (blue/lavender flowing shapes)
+# Default (soft blue flowing shapes)
 python generate.py
 
 # Custom colors
-python generate.py --primary "#C41535" --secondary "#FFC8B8" --output warm.mp4
+python generate.py --primary "#C41535" --secondary "#FFB8B8" --output warm.mp4
 
 # Longer, slower animation
 python generate.py --duration 10 --speed 0.5
@@ -48,13 +48,13 @@ python generate.py --seed 99
 
 | Flag | Default | Description |
 |---|---|---|
-| `--primary` | `#1535C4` | Primary color (hex) |
-| `--secondary` | `#C8B8FF` | Secondary color (hex) |
+| `--primary` | `#2b7fff` | Primary color (hex) |
+| `--secondary` | `#b8d8ff` | Secondary color (hex) |
 | `--width` | `1080` | Width in pixels |
 | `--height` | `1080` | Height in pixels |
 | `--duration` | `6` | Duration in seconds |
 | `--fps` | `30` | Frames per second |
-| `--speed` | `1.0` | Animation speed multiplier |
+| `--speed` | `0.15` | Animation speed multiplier |
 | `--noise-scale` | `0.7` | Feature scale (lower = larger shapes) |
 | `--octaves` | `2` | fBM octaves (fewer = smoother) |
 | `--warp` | `1.5` | Domain warp strength |

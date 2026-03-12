@@ -425,13 +425,13 @@ def render_video(args):
 
 def main():
     ap = argparse.ArgumentParser(description="Generate procedural background video")
-    ap.add_argument("--primary", default="#1535C4", help="Primary color hex (default: #1535C4)")
-    ap.add_argument("--secondary", default="#C8B8FF", help="Secondary color hex (default: #C8B8FF)")
+    ap.add_argument("--primary", default="#2b7fff", help="Primary color hex (default: #2b7fff)")
+    ap.add_argument("--secondary", default="#b8d8ff", help="Secondary color hex (default: #b8d8ff)")
     ap.add_argument("--width", type=int, default=1080)
     ap.add_argument("--height", type=int, default=1080)
     ap.add_argument("--duration", type=float, default=6, help="Seconds (default: 6)")
     ap.add_argument("--fps", type=int, default=30)
-    ap.add_argument("--speed", type=float, default=1.0, help="Animation speed (default: 1.0)")
+    ap.add_argument("--speed", type=float, default=0.15, help="Animation speed (default: 0.15)")
     ap.add_argument("--noise-scale", type=float, default=0.7,
                     help="Noise feature scale; lower = larger shapes (default: 0.7)")
     ap.add_argument("--octaves", type=int, default=2,
