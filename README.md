@@ -6,7 +6,7 @@ Inspired by the beautiful background on the [OpenAI Codex](https://openai.com/co
 
 ![sample](sample.jpg)
 
-https://github.com/user-attachments/assets/sample.webm
+https://github.com/robinebers/noisy-video-generator/raw/main/sample.mp4
 
 ## How it works
 
@@ -66,6 +66,7 @@ python generate.py --output hero.webm
 | `--octaves` | `2` | fBM octaves (fewer = smoother) |
 | `--warp` | `1.5` | Domain warp strength |
 | `--grain` | `0.035` | Grain intensity (0-1) |
+| `--grain-size` | `2` | Grain particle size in px (1=fine, 2=2x2, 4=chunky) |
 | `--blur` | `20.0` | Gaussian blur sigma in px (0 = off) |
 | `--seed` | `42` | Deterministic seed |
 | `--output` | `output.mp4` | Output file path (.mp4 or .webm) |

@@ -257,6 +257,12 @@ def lerp_color(a, b, t):
     return tuple(a[i] + (b[i] - a[i]) * t for i in range(3))
 
 
+def lerp_grain(a, b, t):
+    """Slow-cycle between two grain patterns using a smooth sine curve."""
+    blend = 0.5 + 0.5 * np.sin(t * 2 * np.pi)
+    return (a * (1.0 - blend) + b * blend).astype(np.int16)
+
+
 def infer_palette(primary_hex: str, secondary_hex: str):
     primary = hex_to_rgb(primary_hex)
     secondary = hex_to_rgb(secondary_hex)
@@ -363,6 +369,18 @@ def render_video(args):
     pixel_w = 1.0 / width
     pixel_h = 1.0 / height
 
+    # Pre-generate grain textures at half resolution for slow-cycling blend
+    grain_a, grain_b = None, None
+    if args.grain > 0:
+        gs = args.grain_size
+        small_h, small_w = height // gs, width // gs
+        rng_a = np.random.default_rng(seed=int(args.seed * 31))
+        rng_b = np.random.default_rng(seed=int(args.seed * 59))
+        grain_a_small = rng_a.normal(0, args.grain * 255, (small_h, small_w, 3)).astype(np.int16)
+        grain_b_small = rng_b.normal(0, args.grain * 255, (small_h, small_w, 3)).astype(np.int16)
+        grain_a = grain_a_small.repeat(gs, axis=0).repeat(gs, axis=1)[:height, :width]
+        grain_b = grain_b_small.repeat(gs, axis=0).repeat(gs, axis=1)[:height, :width]
+
     ffmpeg = start_ffmpeg(width, height, args.fps, args.output)
 
     print(f"Rendering {total_frames} frames ({args.duration}s @ {args.fps}fps) "
@@ -397,9 +415,9 @@ def render_video(args):
         frame = np.flipud(frame)
 
         if args.grain > 0:
-            rng = np.random.default_rng(seed=int(i * 7919 + args.seed))
-            noise = rng.normal(0, args.grain * 255, frame.shape)
-            frame = np.clip(frame.astype(np.int16) + noise.astype(np.int16), 0, 255).astype(np.uint8)
+            t_grain = i / total_frames
+            noise = lerp_grain(grain_a, grain_b, t_grain)
+            frame = np.clip(frame.astype(np.int16) + noise, 0, 255).astype(np.uint8)
 
         ffmpeg.stdin.write(frame.tobytes())
 
@@ -440,6 +458,8 @@ def main():
                     help="Domain warp strength (default: 1.5)")
     ap.add_argument("--grain", type=float, default=0.035,
                     help="Grain intensity 0-1 (default: 0.035)")
+    ap.add_argument("--grain-size", type=int, default=2,
+                    help="Grain particle size in px; 1=per-pixel, 2=2x2, 4=4x4 (default: 2)")
     ap.add_argument("--blur", type=float, default=20.0,
                     help="Gaussian blur sigma in px; 0 = off (default: 20.0)")
     ap.add_argument("--seed", type=float, default=42)

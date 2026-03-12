@@ -4,5 +4,5 @@ __pycache__/
 *.mp4
 *.webm
 !sample.jpg
-!sample.webm
+!sample.mp4
 .DS_Store
