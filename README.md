@@ -2,7 +2,11 @@
 
 GPU-accelerated procedural video generator. Produces seamlessly-looping abstract gradient animations using domain-warped fractal noise, rendered via GLSL shaders.
 
+Inspired by the beautiful background on the [OpenAI Codex](https://openai.com/codex/) website -- I wanted something similar for my own site but fully procedural and configurable.
+
 ![sample](sample.jpg)
+
+https://github.com/user-attachments/assets/sample.webm
 
 ## How it works
 
@@ -61,7 +65,7 @@ python generate.py --output hero.webm
 | `--noise-scale` | `0.7` | Feature scale (lower = larger shapes) |
 | `--octaves` | `2` | fBM octaves (fewer = smoother) |
 | `--warp` | `1.5` | Domain warp strength |
-| `--grain` | `0.03` | Grain intensity (0-1) |
+| `--grain` | `0.035` | Grain intensity (0-1) |
 | `--blur` | `20.0` | Gaussian blur sigma in px (0 = off) |
 | `--seed` | `42` | Deterministic seed |
 | `--output` | `output.mp4` | Output file path (.mp4 or .webm) |

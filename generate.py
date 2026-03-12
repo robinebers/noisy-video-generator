@@ -45,7 +45,6 @@ uniform float u_speed;
 uniform float u_noise_scale;
 uniform int   u_octaves;
 uniform float u_warp;
-uniform float u_grain;
 uniform float u_seed;
 
 uniform vec3 u_col_deep;
@@ -147,12 +146,6 @@ float fbm4(vec4 p, int octs) {
     return val;
 }
 
-float hash(vec2 p) {
-    vec3 p3 = fract(vec3(p.xyx) * 0.1031);
-    p3 += dot(p3, p3.yzx + 33.33);
-    return fract((p3.x + p3.y) * p3.z);
-}
-
 void main() {
     vec2 uv = v_uv;
     float aspect = u_resolution.x / u_resolution.y;
@@ -194,10 +187,6 @@ void main() {
 
     float accent_mask = smoothstep(0.3, 0.5, n) * smoothstep(0.7, 0.5, n);
     col = mix(col, u_col_accent, accent_mask * 0.15);
-
-    // Grain (applied before blur so it gets softened too)
-    float grain = (hash(uv * u_resolution + u_time * 1000.0) - 0.5) * u_grain;
-    col += grain;
 
     col = clamp(col, 0.0, 1.0);
     frag_color = vec4(col, 1.0);
@@ -335,7 +324,7 @@ def start_ffmpeg(width: int, height: int, fps: int, output: str):
 
     if ext == "webm":
         cmd += ["-c:v", "libvpx-vp9", "-pix_fmt", "yuv420p",
-                "-crf", "30", "-b:v", "0", "-an"]
+                "-crf", "34", "-b:v", "0", "-an"]
     else:
         cmd += ["-c:v", "libx264", "-pix_fmt", "yuv420p",
                 "-crf", "18", "-preset", "medium",
@@ -362,7 +351,6 @@ def render_video(args):
     np_["u_noise_scale"].value = args.noise_scale
     np_["u_octaves"].value = args.octaves
     np_["u_warp"].value = args.warp
-    np_["u_grain"].value = args.grain
     np_["u_seed"].value = float(args.seed)
     for name, rgb in palette.items():
         np_[f"u_col_{name}"].value = rgb
@@ -407,6 +395,12 @@ def render_video(args):
 
         frame = np.frombuffer(raw, dtype=np.uint8).reshape(height, width, 3)
         frame = np.flipud(frame)
+
+        if args.grain > 0:
+            rng = np.random.default_rng(seed=int(i * 7919 + args.seed))
+            noise = rng.normal(0, args.grain * 255, frame.shape)
+            frame = np.clip(frame.astype(np.int16) + noise.astype(np.int16), 0, 255).astype(np.uint8)
+
         ffmpeg.stdin.write(frame.tobytes())
 
         if (i + 1) % 30 == 0 or i == total_frames - 1:
@@ -444,8 +438,8 @@ def main():
                     help="fBM octaves; fewer = smoother (default: 2)")
     ap.add_argument("--warp", type=float, default=1.5,
                     help="Domain warp strength (default: 1.5)")
-    ap.add_argument("--grain", type=float, default=0.03,
-                    help="Grain intensity 0-1 (default: 0.03)")
+    ap.add_argument("--grain", type=float, default=0.035,
+                    help="Grain intensity 0-1 (default: 0.035)")
     ap.add_argument("--blur", type=float, default=20.0,
                     help="Gaussian blur sigma in px; 0 = off (default: 20.0)")
     ap.add_argument("--seed", type=float, default=42)
