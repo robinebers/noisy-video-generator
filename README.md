@@ -4,9 +4,9 @@ GPU-accelerated procedural video generator. Produces seamlessly-looping abstract
 
 Inspired by the beautiful background on the [OpenAI Codex](https://openai.com/codex/) website -- I wanted something similar for my own site but fully procedural and configurable.
 
-![sample](sample.jpg)
+![preview](preview.gif)
 
-<video src="https://github.com/robinebers/noisy-video-generator/raw/main/sample.mp4" autoplay loop muted playsinline width="100%"></video>
+*Low-quality GIF preview -- the actual output is a smooth, high-quality MP4/WebM at full resolution.*
 
 ## How it works
 

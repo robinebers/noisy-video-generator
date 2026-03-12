@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 *.mp4
 *.webm
-!sample.jpg
+*.gif
+!preview.gif
 !sample.mp4
 .DS_Store
