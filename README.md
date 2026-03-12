@@ -6,7 +6,7 @@ Inspired by the beautiful background on the [OpenAI Codex](https://openai.com/co
 
 ![sample](sample.jpg)
 
-https://github.com/robinebers/noisy-video-generator/raw/main/sample.mp4
+<video src="https://github.com/robinebers/noisy-video-generator/raw/main/sample.mp4" autoplay loop muted playsinline width="100%"></video>
 
 ## How it works
 
